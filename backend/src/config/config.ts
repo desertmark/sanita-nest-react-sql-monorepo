@@ -14,6 +14,7 @@ const {
   DB_GENERATE_SCHEMA_FORCE,
   PORT,
   HOST,
+  PARSE_SERVICE_URL,
 } = process.env;
 
 export const config = {
@@ -31,6 +32,7 @@ export const config = {
     generateSchema: DB_GENERATE_SCHEMA == 'true',
     generateSchemaForce: DB_GENERATE_SCHEMA_FORCE == 'true',
   },
+  parseServiceUrl: PARSE_SERVICE_URL,
 };
 
 export interface IConfig {
@@ -48,5 +50,6 @@ export interface IConfig {
     generateSchema: boolean;
     generateSchemaForce: boolean;
   };
+  parseServiceUrl: string;
 }
 export const CONFIG = Symbol('config');

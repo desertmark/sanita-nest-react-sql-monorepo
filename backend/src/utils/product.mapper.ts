@@ -92,6 +92,25 @@ export class ProductMapper {
       caja2: ProductMapper.toDecimalProportion(mdbProduct.caja2),
     };
   }
+
+  /**
+   * File Header:
+   * Código | Descripción | Precio | Bonif1 |	Bonif2 | Neto Final con IVA | Precio Cliente con Margen | Estado
+   * To avoid troubles with words with special sybmols like `Código` get the values and extract by order.
+   */
+  static xlsJsonToXlsProductEntityt(xlsProduct: Record<string, string>) {
+    const values = Object.values(xlsProduct);
+    return {
+      codigo: ProductMapper.parseIntProductCode(values[0]),
+      precio: ProductMapper.toMoney(parseFloat(values[2])),
+      bonificacion: ProductMapper.toDecimalProportion(
+        parseFloat(values[3]) || 0,
+      ),
+      bonificacion2: ProductMapper.toDecimalProportion(
+        parseFloat(values[4]) || 0,
+      ),
+    };
+  }
 }
 
 export class ProductCalculator {

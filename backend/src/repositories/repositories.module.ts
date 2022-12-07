@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '../../src/config/config.module';
-import { CategoryEntity } from '../../src/models/entities/category.entity';
-import { ProductEntity } from '../../src/models/entities/product.entity';
+import { ConfigModule } from '../config/config.module';
+import { CategoryEntity } from '../models/entities/category.entity';
+import { ProductEntity } from '../models/entities/product.entity';
 import { CategoryRepository } from './category.repository';
 
 const providers = [CategoryRepository];

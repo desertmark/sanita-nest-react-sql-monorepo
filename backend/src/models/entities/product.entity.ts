@@ -4,29 +4,6 @@ export type ProductEntityColumns = keyof ProductEntity;
 
 @Entity({ name: 'Products' })
 export class ProductEntity {
-  static upsertConflictKeys(): ProductEntityColumns {
-    return 'code';
-  }
-
-  static upsertKeys(): ProductEntityColumns[] {
-    return [
-      'description',
-      'utility',
-      'listPrice',
-      'vat',
-      'dolar',
-      'transport',
-      'card',
-      'cost',
-      'price',
-      'cardPrice',
-      'bonus',
-      'bonus2',
-      'cashDiscount',
-      'cashDiscount2',
-    ];
-  }
-
   @PrimaryGeneratedColumn()
   id?: number;
   @Column({ type: 'bigint' })

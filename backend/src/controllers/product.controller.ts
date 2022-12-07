@@ -7,8 +7,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ProductManager } from '../../src/managers/product.manager';
-import { ProductEntity } from '../../src/models/entities/product.entity';
+import { ProductManager } from '../managers/product.manager';
+import { ProductEntity } from '../models/entities/product.entity';
 
 @Controller('products')
 export class ProductController {
@@ -25,6 +25,15 @@ export class ProductController {
     if (!file) {
       throw new BadRequestException('file field is empty.');
     }
-    return await this.productsManager.insertFromMdb(file);
+    return await this.productsManager.upsertFromMdb(file);
+  }
+
+  @Post('xls')
+  @UseInterceptors(FileInterceptor('file'))
+  async xls(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('file field is empty.');
+    }
+    return await this.productsManager.updateFromXls(file);
   }
 }

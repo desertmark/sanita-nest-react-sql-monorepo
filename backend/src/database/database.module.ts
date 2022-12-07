@@ -4,12 +4,13 @@ import {
   TypeOrmModule,
   TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { IConfig, CONFIG } from '../../src/config/config';
-import { ConfigModule } from '../../src/config/config.module';
-import { CategoryEntity } from '../../src/models/entities/category.entity';
-import { MdbProduct } from '../../src/models/entities/mdb-product.entity';
-import { ProductEntity } from '../../src/models/entities/product.entity';
+import { IConfig, CONFIG } from '../config/config';
+import { ConfigModule } from '../config/config.module';
+import { CategoryEntity } from '../models/entities/category.entity';
+import { MdbProduct } from '../models/entities/mdb-product.entity';
+import { ProductEntity } from '../models/entities/product.entity';
 import { EntityManager } from 'typeorm';
+import { XlsProduct } from '../models/entities/xls-product.entity';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { EntityManager } from 'typeorm';
           },
           host: config.db.host,
           port: +config.db.port,
-          entities: [ProductEntity, CategoryEntity, MdbProduct],
+          entities: [ProductEntity, CategoryEntity, MdbProduct, XlsProduct],
           synchronize: !!config.db.generateSchema,
           extra: {
             validateConnection: false,

@@ -10,15 +10,39 @@ import { ProductEntity } from '../src/models/entities/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryEntity } from '../src/models/entities/category.entity';
 import { MdbProduct } from '../src/models/entities/mdb-product.entity';
+import { v4 as uuidv4 } from 'uuid';
+
+export function productFactory(codeString = '00.00.00.01', overrides = {}) {
+  const code = parseInt(codeString.replace(/\./g, ''));
+  return {
+    code,
+    codeString,
+    description: `Test-description-${uuidv4()}`,
+    utility: 0.21,
+    listPrice: 5,
+    vat: 0.21,
+    dolar: 0.21,
+    transport: 0.21,
+    // categoryId: 1,
+    card: 0.21,
+    cost: 0.21,
+    price: 0.21,
+    cardPrice: 0.21,
+    // Temp fields until discounts array can be used.
+    bonus: 0.1,
+    bonus2: 0.1,
+    cashDiscount: 0.1,
+    cashDiscount2: 0.1,
+    ...overrides,
+  };
+}
+
 describe('ProductController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        AppModule,
-        TypeOrmModule.forFeature([ProductEntity, CategoryEntity, MdbProduct]),
-      ],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -29,8 +53,9 @@ describe('ProductController (e2e)', () => {
     return await app.get(EntityManager).query(
       `
         DELETE FROM Products;
-        DELETE FROM Categories; 
-        DELETE FROM MdbProducts; 
+        DELETE FROM Categories;
+        DELETE FROM MdbProducts;
+        DELETE FROM XlsProducts;
         `,
     );
   });
@@ -168,4 +193,43 @@ describe('ProductController (e2e)', () => {
       });
     },
   );
+
+  it('Should update DB with xls information', async () => {
+    // File Values
+    const fileData = {
+      listPrice: 10,
+      bonus: 0.4,
+      bonus2: 0,
+    };
+
+    // Arrange
+    const productsRepository = app
+      .get(EntityManager)
+      .getRepository(ProductEntity);
+
+    const products = [
+      productFactory('00.00.00.01'),
+      productFactory('00.00.00.02'),
+    ];
+
+    await productsRepository.insert(products[0]);
+    await productsRepository.insert(products[1]);
+
+    const keysToAssert = ['bonus', 'bonus2', 'listPrice'];
+    const file = readFileSync(resolve('test', 'data', 'bulk-update.xls'));
+    // Act
+    const response = await request(app.getHttpServer())
+      .post('/products/xls')
+      .attach('file', file, 'bulk-update.xls');
+
+    // Assert
+    expect(response.status).toBe(201);
+    const res = await productsRepository.find();
+    products.forEach((product, i) => {
+      keysToAssert.forEach((k) => {
+        const dbProduct = res[i];
+        expect(dbProduct).toHaveProperty(k, fileData[k]);
+      });
+    });
+  });
 });

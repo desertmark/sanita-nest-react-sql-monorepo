@@ -2,14 +2,9 @@ import { writeFileSync, readFileSync, unlinkSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { execSync } from 'child_process';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { IConfig } from '../../src/config/config';
-// import axios from 'axios';
-// import FormData from 'form-data';
-// import { IConfig } from '@config/config';
-export class IFile {
-  data: Buffer;
-  name: string;
-}
+import { CONFIG, IConfig } from '../config/config';
+import axios, { AxiosError } from 'axios';
+import * as FormData from 'form-data';
 export interface ParseServiceResponseBody<T = any> {
   data: T;
   type: string;
@@ -17,7 +12,7 @@ export interface ParseServiceResponseBody<T = any> {
 @Injectable()
 export class ParseManager {
   constructor(
-    // @Inject('config') private config: IConfig,
+    @Inject(CONFIG) private config: IConfig,
     private logger: Logger,
   ) {}
 
@@ -59,27 +54,31 @@ export class ParseManager {
     }
   }
 
-  //   async xlsToJson<T>(file: IFile, headerIndex: number): Promise<T> {
-  //     try {
-  //       const form = new FormData();
-  //       form.append('file', file.data, file.name);
-  //       form.append('headerIndex', headerIndex);
-  //       const res = await axios.post<ParseServiceResponseBody<T>>(
-  //         this.config.parseServiceUrl,
-  //         form,
-  //         {
-  //           headers: {
-  //             ...form.getHeaders(),
-  //           },
-  //         },
-  //       );
-  //       return res.data.data;
-  //     } catch (error) {
-  //       console.error('Failed to parse xls to json', {
-  //         error,
-  //         file,
-  //         headerIndex,
-  //       });
-  //     }
-  //   }
+  async xlsToJson<T>(
+    file: Express.Multer.File,
+    headerIndex: number,
+  ): Promise<T> {
+    try {
+      const form = new FormData();
+      form.append('file', file.buffer, file.originalname);
+      form.append('headerIndex', headerIndex);
+
+      const res = await axios.post<ParseServiceResponseBody<T>>(
+        this.config.parseServiceUrl,
+        form,
+        {
+          headers: {
+            ...form.getHeaders(),
+          },
+        },
+      );
+      return res.data.data;
+    } catch (error) {
+      this.logger.error('Failed to parse xls to json', {
+        parseServiceUrl: this.config.parseServiceUrl,
+        error: error?.response?.data || error?.message || error,
+        headerIndex,
+      });
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategoryEntity } from '../../src/models/entities/category.entity';
-import { ChunkUtil } from '../../src/utils/common.utils';
+import { CategoryEntity } from '../models/entities/category.entity';
+import { ChunkUtil } from '../utils/common.utils';
 import { Repository } from 'typeorm';
 
 @Injectable()
