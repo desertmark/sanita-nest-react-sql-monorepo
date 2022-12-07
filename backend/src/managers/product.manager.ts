@@ -1,14 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from '../models/entities/product.entity';
 import { IMdbProduct } from '../models/mdb-product';
 import { ProductMapper } from '../utils/product.mapper';
-import { Repository } from 'typeorm';
+import { EntityPropertyNotFoundError, Repository } from 'typeorm';
 import { ParseManager } from './parse.manager';
 import { ChunkUtil } from '../utils/common.utils';
 import { CategoryRepository } from '../repositories/category.repository';
 import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { XlsProduct } from '../models/entities/xls-product.entity';
+import { IListDto } from 'src/models/dtos/list.dto';
 
 @Injectable()
 export class ProductManager {
@@ -24,8 +25,32 @@ export class ProductManager {
     private logger: Logger,
   ) {}
 
-  async findAll(): Promise<ProductEntity[]> {
-    return await this.productsRepository.find();
+  async findAll({
+    page = 0,
+    size = 100,
+    orderBy = 'id',
+    orderDirection = 'asc',
+  }): Promise<IListDto<ProductEntity>> {
+    try {
+      const [items, total] = await this.productsRepository.findAndCount({
+        take: size,
+        skip: page * size,
+        order: {
+          [orderBy]: orderDirection,
+        },
+      });
+      return {
+        items,
+        total,
+        page,
+        size,
+      };
+    } catch (error) {
+      if (error instanceof EntityPropertyNotFoundError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   async upsertFromMdb(file: Express.Multer.File) {
