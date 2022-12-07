@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Screen } from "../Components/Screen";
 import { Box, Typography as Text } from "@mui/material";
+import { SanitaLogoSlogan } from "../Components/Logo";
 export const Home: FC = () => {
   return (
     <Screen role="home" sx={{ justifyContent: "center" }}>
@@ -11,6 +12,7 @@ export const Home: FC = () => {
         alignItems="center"
         sx={{ gap: 1 }}
       >
+        <SanitaLogoSlogan color="blue" />
         <Text
           variant="logo"
           color="primary"
@@ -19,7 +21,7 @@ export const Home: FC = () => {
         >
           Bienvenido a Sanita
         </Text>
-        <Text variant="logo" color="primary">
+        <Text variant="logo" fontSize={20} color="primary">
           Haga click aqui para empezar
         </Text>
       </Box>

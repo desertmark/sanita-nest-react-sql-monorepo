@@ -8,7 +8,7 @@ import {
 import { FC } from "react";
 import { Logout, Menu } from "@mui/icons-material";
 import { useAppState } from "../Providers/AppProvider";
-import { FoodRunLogo } from "./Logo";
+import { SanitaLogo } from "./Logo";
 
 export const Header: FC<unknown> = () => {
   const { openSidebar } = useAppState();
@@ -25,7 +25,7 @@ export const Header: FC<unknown> = () => {
               <Menu />
             </IconButton>
           )}
-          <FoodRunLogo size={64} />
+          <SanitaLogo size={64} />
           <Text variant="h6" sx={{ flexGrow: 1 }}></Text>
           {isAdmin && (
             <>

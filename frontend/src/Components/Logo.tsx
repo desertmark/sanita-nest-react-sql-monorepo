@@ -1,40 +1,28 @@
-import { ElectricBolt } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
-import { FC, HTMLAttributes } from "react";
-import logo from "../assets/food-run-logo-512.png";
-import logoAlt from "../assets/food-run-logo-alt-512.png";
-export const Logo = styled(ElectricBolt)(({ theme }) => {
-  return {
-    fontSize: theme.typography.h3.fontSize,
-    transitionDuration: theme.transitions.duration.shortest.toString(),
-    transitionProperty: "all",
-    ":hover": {
-      color: "#fcd303",
-    },
-  };
-});
+import { FC } from "react";
+import { ReactComponent as SanitaLogoSvg } from "../assets/logo.svg";
+import { ReactComponent as SanitaLogoSloganSvg } from "../assets/logo-slogan.svg";
 
-export interface FoodRunLogoProps
-  extends React.DetailedHTMLProps<
-    React.ImgHTMLAttributes<HTMLImageElement>,
-    HTMLImageElement
-  > {
+type SvgProps = React.SVGProps<SVGSVGElement> & { title?: string };
+
+export interface SanitaLogoProp extends SvgProps {
   size?: number;
   secondary?: boolean;
 }
 
-export const FoodRunLogo: FC<FoodRunLogoProps> = ({
+export const SanitaLogo: FC<SanitaLogoProp> = ({
+  secondary,
+  size,
+  ...props
+}) => {
+  return <SanitaLogoSvg style={{ width: size, height: size }} {...props} />;
+};
+
+export const SanitaLogoSlogan: FC<SanitaLogoProp> = ({
   secondary,
   size,
   ...props
 }) => {
   return (
-    <img
-      src={secondary ? logoAlt : logo}
-      alt="logo"
-      {...props}
-      height={size || "auto"}
-      width={size || "auto"}
-    />
+    <SanitaLogoSloganSvg style={{ width: size, height: size }} {...props} />
   );
 };

@@ -20,10 +20,10 @@ export const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#081b45",
+      main: "#004a7c",
     },
     secondary: {
-      main: "#fae9e1",
+      main: "#cbb26b",
     },
     warning: {
       main: "#ef6c00",

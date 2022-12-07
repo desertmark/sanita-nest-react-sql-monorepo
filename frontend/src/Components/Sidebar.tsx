@@ -2,7 +2,7 @@ import { Divider, Drawer, Typography as Text, useTheme } from "@mui/material";
 import { AccountCircle, Fastfood, Home, Settings } from "@mui/icons-material";
 import { useAppState } from "../Providers/AppProvider";
 import { Box } from "@mui/system";
-import { FoodRunLogo } from "./Logo";
+import { SanitaLogo, SanitaLogoSlogan } from "./Logo";
 import { List } from "./List";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export const Sidebar = () => {
             gap: spacing(2),
           }}
         >
-          <FoodRunLogo
+          <SanitaLogoSlogan
             style={{ width: 135, height: 90, objectFit: "cover" }}
             secondary
           />
@@ -36,8 +36,9 @@ export const Sidebar = () => {
             variant="logo"
             sx={{ flexGrow: 1, width: "100%", textAlign: "right" }}
             color="primary"
+            fontSize={18}
           >
-            Your food orgnized
+            Estamos para aconcejar
           </Text>
         </Box>
         <Divider />
