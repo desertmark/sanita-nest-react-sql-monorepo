@@ -3,6 +3,7 @@ import { Layout } from "./Components/Layout";
 import { Providers } from "./Providers/Providers";
 import { Home } from "./Screens/Home";
 import { Products } from "./Screens/Products";
+import { Login } from "./Screens/Login";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "/products",
         element: <Products />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
       },
     ],
   },

@@ -9,13 +9,14 @@ import { FC } from "react";
 import { Logout, Menu } from "@mui/icons-material";
 import { useAppState } from "../Providers/AppProvider";
 import { SanitaLogo } from "./Logo";
+import { Link } from "react-router-dom";
 
 export const Header: FC<unknown> = () => {
   const { openSidebar } = useAppState();
-  const isAdmin = true;
+  const isAdmin = false;
   const logout = () => console.log("logout");
   const login = () => console.log("login");
-  const user = {};
+  const user = undefined;
   return (
     <div>
       <AppBar position="sticky">
@@ -32,7 +33,9 @@ export const Header: FC<unknown> = () => {
             color="secondary"
             sx={{ flexGrow: 1 }}
           >
-            Sanita
+            <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+              Sanita
+            </Link>
           </Text>
           {isAdmin && (
             <>
@@ -48,8 +51,10 @@ export const Header: FC<unknown> = () => {
             </>
           )}
           {!user && (
-            <Button color="inherit" onClick={login}>
-              Login
+            <Button color="inherit">
+              <Link to="/login" style={{ color: "inherit", textDecoration: "none" }}>
+                Ingresar
+              </Link>
             </Button>
           )}
         </Toolbar>

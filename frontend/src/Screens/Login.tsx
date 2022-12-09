@@ -2,10 +2,13 @@ import { FC } from "react";
 import { Screen } from "../Components/Screen";
 import { Box, Typography as Text } from "@mui/material";
 import { SanitaLogoSlogan } from "../Components/Logo";
-import { Link } from "react-router-dom";
-export const Home: FC = () => {
+import { LoginForm } from "../Components/LoginForm";
+export const Login: FC = () => {
   return (
-    <Screen role="home" sx={{ justifyContent: "center" }}>
+    <Screen
+      role="login"
+      sx={{ justifyContent: "center", alignItems: "center" }}
+    >
       <Box
         textAlign="center"
         display="flex"
@@ -23,8 +26,10 @@ export const Home: FC = () => {
           Bienvenido a Sanita
         </Text>
         <Text variant="logo" fontSize={20} color="primary">
-          Haga click <Link to="/login">aqui</Link> para empezar
+          Inicie sesion para empezar
         </Text>
+
+        <LoginForm />
       </Box>
     </Screen>
   );
