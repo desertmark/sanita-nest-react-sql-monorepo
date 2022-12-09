@@ -24,12 +24,14 @@ export class ProductController {
     @Query('size', new DefaultValuePipe(100), ParseIntPipe) size?: number,
     @Query('orderBy') orderBy?: string,
     @Query('orderDirection') orderDirection?: string,
+    @Query('filter') filter?: string,
   ): Promise<IListDto<ProductEntity>> {
     return this.productsManager.findAll({
       page,
       size,
       orderBy,
       orderDirection,
+      filter,
     });
   }
 

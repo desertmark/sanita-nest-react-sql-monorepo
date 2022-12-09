@@ -5,9 +5,12 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "backend"
+    "backend",
+    "frontend"
   ],
   "scripts": {
-    "start": "yarn workspace backend run start:dev"
+    "start": "yarn run start:be && yarn run start:fe",
+    "start:be": "yarn workspace backend run start:dev",
+    "start:fe": "yarn workspace frontend run start"
   }
 }

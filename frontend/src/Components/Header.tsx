@@ -26,10 +26,20 @@ export const Header: FC<unknown> = () => {
             </IconButton>
           )}
           <SanitaLogo size={64} />
-          <Text variant="h6" sx={{ flexGrow: 1 }}></Text>
+          <Text
+            variant="logo"
+            fontSize={32}
+            color="secondary"
+            sx={{ flexGrow: 1 }}
+          >
+            Sanita
+          </Text>
           {isAdmin && (
             <>
-              <Text sx={{ display: { xs: "none", md: "block" } }}>
+              <Text
+                color="secondary"
+                sx={{ display: { xs: "none", md: "block" } }}
+              >
                 {"user?.displayName"}
               </Text>
               <IconButton onClick={logout} color="inherit">

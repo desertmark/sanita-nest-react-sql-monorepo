@@ -1,5 +1,27 @@
 version: "3"
 services:
+  # frontend:
+  #   image: node:16.15
+  #   working_dir: /home/app/sanita
+  #   command: yarn run start:fe
+  #   volumes:
+  #     - .:/home/app/sanita
+  #     - ./node_modules:/home/app/sanita/node_modules
+  #     - ./frontend/node_modules:/home/app/sanita/frontend/node_modules
+  #   ports:
+  #     - "3000:3000"
+  # backend:
+  #   image: node:16.15
+  #   working_dir: /home/app/sanita
+  #   command: yarn run start:be
+  #   volumes:
+  #     - .:/home/app/sanita
+  #     - ./node_modules:/home/app/sanita/node_modules
+  #     - ./backend/node_modules:/home/app/sanita/backend/node_modules
+  #   ports:
+  #     - "3001:3001"
+    # depends_on:
+    # - mssql
   mssql:
     #docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04
     # image: mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04

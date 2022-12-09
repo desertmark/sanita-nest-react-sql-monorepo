@@ -74,7 +74,7 @@ export class ParseManager {
       );
       return res.data.data;
     } catch (error) {
-      this.logger.error('Failed to parse xls to json', {
+      this.logger.error('Failed to parse xls to json', error, {
         parseServiceUrl: this.config.parseServiceUrl,
         error: error?.response?.data || error?.message || error,
         headerIndex,

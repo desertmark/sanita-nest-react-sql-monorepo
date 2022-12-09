@@ -3,10 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from '../models/entities/product.entity';
 import { IMdbProduct } from '../models/mdb-product';
 import { ProductMapper } from '../utils/product.mapper';
-import { EntityPropertyNotFoundError, Repository } from 'typeorm';
+import {
+  EntityPropertyNotFoundError,
+  FindManyOptions,
+  Like,
+  Repository,
+} from 'typeorm';
 import { ParseManager } from './parse.manager';
 import { ChunkUtil } from '../utils/common.utils';
-import { CategoryRepository } from '../repositories/category.repository';
 import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { XlsProduct } from '../models/entities/xls-product.entity';
 import { IListDto } from 'src/models/dtos/list.dto';
@@ -20,24 +24,30 @@ export class ProductManager {
     private mdbProductRepository: Repository<MdbProduct>,
     @InjectRepository(XlsProduct)
     private xlsProductRepository: Repository<XlsProduct>,
-    // private categoryRepository: CategoryRepository,
     private parser: ParseManager,
     private logger: Logger,
   ) {}
 
-  async findAll({
-    page = 0,
-    size = 100,
-    orderBy = 'id',
-    orderDirection = 'asc',
-  }): Promise<IListDto<ProductEntity>> {
+  async findAll(params): Promise<IListDto<ProductEntity>> {
     try {
+      const {
+        page = 0,
+        size = 100,
+        orderBy = 'id',
+        orderDirection = 'asc',
+        filter = '',
+      } = params;
+      this.logger.log('Find all products', { params });
       const [items, total] = await this.productsRepository.findAndCount({
         take: size,
         skip: page * size,
         order: {
           [orderBy]: orderDirection,
         },
+        where: [
+          { codeString: Like(`${filter}%`) },
+          { description: Like(`%${filter}%`) },
+        ],
       });
       return {
         items,
@@ -46,6 +56,7 @@ export class ProductManager {
         size,
       };
     } catch (error) {
+      this.logger.error('Failed to find all products', error, { params });
       if (error instanceof EntityPropertyNotFoundError) {
         throw new BadRequestException(error.message);
       }

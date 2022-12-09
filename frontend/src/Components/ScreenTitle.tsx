@@ -21,10 +21,7 @@ export const ScreenTitle: FC<ScreenTitleProps> = ({
       <Text variant={subtitle ? "h6" : "h5"}>{text}</Text>
     </Box>
     {caption && (
-      <Text
-        variant="caption"
-        sx={{ marginTop: subtitle ? 1 : 2, display: "flex" }}
-      >
+      <Text color="primary" sx={{ marginTop: subtitle ? 1 : 2, display: "flex" }}>
         {caption}
       </Text>
     )}
