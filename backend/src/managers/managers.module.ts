@@ -13,16 +13,7 @@ import { SqlRepositoriesModule } from '../repositories/sql-repositories.module';
 const providers = [ProductManager, CategoryManager, ParseManager];
 
 @Module({
-  imports: [
-    ConfigModule,
-    SqlRepositoriesModule,
-    TypeOrmModule.forFeature([
-      ProductEntity,
-      CategoryEntity,
-      MdbProduct,
-      XlsProduct,
-    ]),
-  ],
+  imports: [ConfigModule, SqlRepositoriesModule],
   providers,
   exports: providers,
 })

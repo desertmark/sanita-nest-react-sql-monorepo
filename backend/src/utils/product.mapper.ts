@@ -4,6 +4,7 @@ import { sumBy } from 'lodash';
 import { CommonUtils } from './common.utils';
 import { CategoryEntity } from '../../src/models/entities/category.entity';
 import { MdbProduct } from '../../src/models/entities/mdb-product.entity';
+import { IXlsUpdateProduct } from 'src/models/xls-update-product';
 
 export class ProductMapper {
   /**
@@ -98,7 +99,9 @@ export class ProductMapper {
    * Código | Descripción | Precio | Bonif1 |	Bonif2 | Neto Final con IVA | Precio Cliente con Margen | Estado
    * To avoid troubles with words with special sybmols like `Código` get the values and extract by order.
    */
-  static xlsJsonToXlsProductEntityt(xlsProduct: Record<string, string>) {
+  static xlsJsonToXlsProductEntityt(
+    xlsProduct: Record<string, string>,
+  ): IXlsUpdateProduct {
     const values = Object.values(xlsProduct);
     return {
       codigo: ProductMapper.parseIntProductCode(values[0]),
