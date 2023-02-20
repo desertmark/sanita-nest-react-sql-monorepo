@@ -7,7 +7,7 @@ import { ChunkUtil } from '../utils/common.utils';
 import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { XlsProduct } from '../models/entities/xls-product.entity';
 import { IListDto } from '../models/dtos/list.dto';
-import { IXlsUpdateProduct } from 'src/models/xls-update-product';
+import { IXlsUpdateProduct } from '../models/xls-update-product';
 
 @Injectable()
 export class SqlProductRepository extends Repository<ProductEntity> {

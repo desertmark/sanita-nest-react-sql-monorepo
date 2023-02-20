@@ -1,6 +1,6 @@
-import { IListDto } from 'src/models/dtos/list.dto';
-import { IMdbProduct } from 'src/models/mdb-product';
-import { IXlsUpdateProduct } from 'src/models/xls-update-product';
+import { IListDto } from '../models/dtos/list.dto';
+import { IMdbProduct } from '../models/mdb-product';
+import { IXlsUpdateProduct } from '../models/xls-update-product';
 
 export abstract class ProductRepository {
   upsertMany(entitiesJson: IMdbProduct[]): void {

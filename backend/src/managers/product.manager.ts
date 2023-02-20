@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { ParseManager } from './parse.manager';
 import { XlsProduct } from '../models/entities/xls-product.entity';
 import { IListDto } from '../models/dtos/list.dto';
-import { ProductRepository } from 'src/repositories/product.repository';
+import { ProductRepository } from '../repositories/product.repository';
 
 @Injectable()
 export class ProductManager {
@@ -27,7 +27,10 @@ export class ProductManager {
       file,
       'lista',
     );
-    await this.productsRepository.upsertMany(mdbProducts);
+    const products = mdbProducts.map((product) =>
+      ProductMapper.mdbJsonToMdbProductEntity(product),
+    );
+    await this.productsRepository.upsertMany(products);
   }
 
   public async updateFromXls(file: Express.Multer.File) {

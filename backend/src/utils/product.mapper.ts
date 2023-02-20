@@ -1,10 +1,9 @@
 import { ProductEntity } from '../../src/models/entities/product.entity';
 import { IMdbProduct } from '../../src/models/mdb-product';
-import { sumBy } from 'lodash';
 import { CommonUtils } from './common.utils';
 import { CategoryEntity } from '../../src/models/entities/category.entity';
 import { MdbProduct } from '../../src/models/entities/mdb-product.entity';
-import { IXlsUpdateProduct } from 'src/models/xls-update-product';
+import { IXlsUpdateProduct } from '../models/xls-update-product';
 
 export class ProductMapper {
   /**

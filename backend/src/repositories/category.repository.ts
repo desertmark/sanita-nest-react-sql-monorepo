@@ -1,4 +1,4 @@
-import { CategoryEntity } from 'src/models/entities/category.entity';
+import { CategoryEntity } from '../models/entities/category.entity';
 
 export abstract class CategoryRepository {
   async find(): Promise<CategoryEntity[]> {
