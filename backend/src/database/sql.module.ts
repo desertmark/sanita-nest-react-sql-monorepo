@@ -18,7 +18,6 @@ import { XlsProduct } from '../models/entities/xls-product.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory(config: IConfig) {
-        console.log('Factory', config);
         return {
           type: 'mssql',
           database: config.db.database,
@@ -43,7 +42,7 @@ import { XlsProduct } from '../models/entities/xls-product.entity';
     }),
   ],
 })
-export class DatbaseModule {
+export class SqlModule {
   constructor(
     @InjectEntityManager() private manager: EntityManager,
     private logger: Logger,

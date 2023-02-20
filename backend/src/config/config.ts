@@ -15,6 +15,9 @@ const {
   PORT,
   HOST,
   PARSE_SERVICE_URL,
+  COSMOS_ENDPOINT,
+  COSMOS_DATABASE,
+  COSMOS_PRIMARY_KEY,
 } = process.env;
 
 export const config = {
@@ -31,6 +34,11 @@ export const config = {
     password: DB_PASSWORD,
     generateSchema: DB_GENERATE_SCHEMA == 'true',
     generateSchemaForce: DB_GENERATE_SCHEMA_FORCE == 'true',
+  },
+  cosmos: {
+    database: COSMOS_DATABASE,
+    endpoint: COSMOS_ENDPOINT,
+    primaryKey: COSMOS_PRIMARY_KEY,
   },
   parseServiceUrl: PARSE_SERVICE_URL,
 };
@@ -49,6 +57,11 @@ export interface IConfig {
     password: string;
     generateSchema: boolean;
     generateSchemaForce: boolean;
+  };
+  cosmos: {
+    endpoint: string;
+    primaryKey: string;
+    database: string;
   };
   parseServiceUrl: string;
 }

@@ -13,7 +13,7 @@ import { ParseManager } from './parse.manager';
 import { ChunkUtil } from '../utils/common.utils';
 import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { XlsProduct } from '../models/entities/xls-product.entity';
-import { IListDto } from 'src/models/dtos/list.dto';
+import { IListDto } from '../models/dtos/list.dto';
 
 @Injectable()
 export class ProductManager {
@@ -97,7 +97,7 @@ export class ProductManager {
   public async updateFromXls(file: Express.Multer.File) {
     this.logger.log('Update products from xls file...');
     this.logger.debug('Parsing xls file...');
-    const json = await this.parser.xlsToJson<Record<string, string>[]>(file, 3);
+    const json = await this.parser.xlsToJson<Record<string, string>[]>(file, 2);
 
     this.logger.debug('Mapping to xlsProducts....');
     const xlsProducts = json.map((p) =>
