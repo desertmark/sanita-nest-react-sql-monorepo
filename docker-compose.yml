@@ -34,10 +34,6 @@ services:
       MSSQL_SA_PASSWORD: "f3rn4nd0.64"
     # networks:
     #   - sanita
-  # parse-service:
-  #   image: desertmark/parse-service:0.0.3
-  #   ports:
-  #     - "3002:80"
 
   # keycloak:
   #   image: jboss/keycloak
