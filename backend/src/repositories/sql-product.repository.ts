@@ -8,6 +8,7 @@ import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { XlsProduct } from '../models/entities/xls-product.entity';
 import { IListDto } from '../models/dtos/list.dto';
 import { IXlsUpdateProduct } from '../models/xls-update-product';
+import { ProductMapper } from '../utils/product.mapper';
 
 @Injectable()
 export class SqlProductRepository extends Repository<ProductEntity> {
@@ -63,10 +64,13 @@ export class SqlProductRepository extends Repository<ProductEntity> {
     }
   }
 
-  async upsertMany(entitiesJson: IMdbProduct[]) {
+  async upsertMany(mdbProducts: IMdbProduct[]) {
+    const mdbEntities = mdbProducts.map((p) =>
+      ProductMapper.mdbJsonToMdbProductEntity(p),
+    );
     const qb = await this.mdbProductRepository.createQueryBuilder();
     this.logger.log('Insert Mdb Products in chunks');
-    await new ChunkUtil<IMdbProduct>(entitiesJson, 100).doInChunks(
+    await new ChunkUtil<IMdbProduct>(mdbEntities, 100).doInChunks(
       async (chunk, page) => {
         this.logger.debug(`Insert Mdb Product in chunk: ${page}`);
         await qb.insert().into(MdbProduct).values(chunk).execute();
