@@ -4,20 +4,20 @@ import {
   TypeOrmModule,
   TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { IConfig, CONFIG } from '../config/config';
 import { ConfigModule } from '../config/config.module';
 import { CategoryEntity } from '../models/entities/category.entity';
 import { MdbProduct } from '../models/entities/mdb-product.entity';
 import { ProductEntity } from '../models/entities/product.entity';
 import { EntityManager } from 'typeorm';
 import { XlsProduct } from '../models/entities/xls-product.entity';
+import { ConfigService } from '../config/config.service';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory(config: IConfig) {
+      useFactory({ config }: ConfigService) {
         return {
           type: 'mssql',
           database: config.db.database,
@@ -38,7 +38,7 @@ import { XlsProduct } from '../models/entities/xls-product.entity';
           },
         } as TypeOrmModuleOptions;
       },
-      inject: [{ token: CONFIG, optional: false }],
+      inject: [ConfigService],
     }),
   ],
 })

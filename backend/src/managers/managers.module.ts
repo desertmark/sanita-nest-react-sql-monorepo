@@ -1,20 +1,54 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { XlsProduct } from '../models/entities/xls-product.entity';
-import { ConfigModule } from '../config/config.module';
-import { CategoryEntity } from '../models/entities/category.entity';
-import { MdbProduct } from '../models/entities/mdb-product.entity';
-import { ProductEntity } from '../models/entities/product.entity';
-import { CategoryManager } from './category.manager';
+import { DynamicModule, Inject, Logger, Module } from '@nestjs/common';
 import { ParseManager } from './parse.manager';
 import { ProductManager } from './product.manager';
 import { SqlRepositoriesModule } from '../repositories/sql-repositories.module';
+import { CosmosRepositoriesModule } from '../repositories/cosmos-repositories.module';
+import { ConfigModule } from '../config/config.module';
 
-const providers = [ProductManager, CategoryManager, ParseManager];
+export interface ManagersModuleOptions {
+  repository: 'sql' | 'cosmos';
+}
 
-@Module({
-  imports: [ConfigModule, SqlRepositoriesModule],
-  providers,
-  exports: providers,
-})
-export class ManagersModule {}
+const repositoryDict = {
+  sql: SqlRepositoriesModule,
+  cosmos: CosmosRepositoriesModule,
+};
+
+const bannerDict = {
+  sql: `
+  ╔═╗╔═╗ ╦  
+  ╚═╗║═╬╗║  
+  ╚═╝╚═╝╚╩═╝
+  `,
+  cosmos: `
+  ╔═╗╔═╗╔═╗╔╦╗╔═╗╔═╗
+  ║  ║ ║╚═╗║║║║ ║╚═╗
+  ╚═╝╚═╝╚═╝╩ ╩╚═╝╚═╝
+  `,
+};
+
+const providers = [ProductManager, ParseManager];
+@Module({})
+export class ManagersModule {
+  static register(options: ManagersModuleOptions): DynamicModule {
+    const moduleDefinition = {
+      imports: [ConfigModule, repositoryDict[options.repository]],
+      providers: [...providers, { provide: 'options', useValue: options }],
+      exports: providers,
+      module: ManagersModule,
+    };
+    return moduleDefinition;
+  }
+
+  constructor(
+    @Inject('options') private options: ManagersModuleOptions,
+    private logger: Logger,
+  ) {}
+
+  onModuleInit() {
+    this.logger.log(
+      `Initializing with ${this.options.repository.toLocaleUpperCase()} repositories`,
+    );
+    this.logger.log(bannerDict[this.options.repository]);
+  }
+}

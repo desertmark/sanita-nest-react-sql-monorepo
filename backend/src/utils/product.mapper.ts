@@ -38,7 +38,9 @@ export class ProductMapper {
   ): ProductEntity {
     const category = categories.find(
       (c) => c.description === CommonUtils.cleanDescription(mdbProduct.rubro),
-    );
+    ) || {
+      description: CommonUtils.cleanDescription(mdbProduct.rubro),
+    };
     return {
       code: ProductMapper.parseIntProductCode(mdbProduct.codigo),
       codeString: mdbProduct.codigo,
@@ -103,6 +105,7 @@ export class ProductMapper {
   ): IXlsUpdateProduct {
     const values = Object.values(xlsProduct);
     return {
+      codigoString: values[0],
       codigo: ProductMapper.parseIntProductCode(values[0]),
       precio: ProductMapper.toMoney(parseFloat(values[2])),
       bonificacion: ProductMapper.toDecimalProportion(
@@ -111,6 +114,17 @@ export class ProductMapper {
       bonificacion2: ProductMapper.toDecimalProportion(
         parseFloat(values[4]) || 0,
       ),
+    };
+  }
+
+  static xlsProductToProductEntity(
+    xlsProduct: IXlsUpdateProduct,
+  ): Partial<ProductEntity> {
+    return {
+      code: xlsProduct.codigo,
+      price: xlsProduct.precio,
+      bonus: xlsProduct.bonificacion,
+      bonus2: xlsProduct.bonificacion2,
     };
   }
 }

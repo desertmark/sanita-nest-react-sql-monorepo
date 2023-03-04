@@ -4,9 +4,6 @@ import { execSync } from 'child_process';
 import { Injectable, Logger } from '@nestjs/common';
 import { read, utils } from 'xlsx';
 
-type CellLetter = string;
-type CellValue = string;
-
 export interface ParseServiceResponseBody<T = any> {
   data: T;
   type: string;

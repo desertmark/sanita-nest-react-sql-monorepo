@@ -18,7 +18,6 @@ describe('ParseManager', () => {
   describe('xlsToJson', () => {
     it('Should parse xls to json', async () => {
       const path = resolve('test', 'data', 'bulk-update.xls');
-      console.log(path);
       const file = readFileSync(path);
       const json = await parseManager.xlsToJson(
         { buffer: file.buffer } as any,

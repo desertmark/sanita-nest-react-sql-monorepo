@@ -1,14 +1,11 @@
 import { ConsoleLogger, Logger, Module, Provider } from '@nestjs/common';
-import { CONFIG, config } from './config';
+import { ConfigService } from './config.service';
 
 const PROVIDERS: Provider[] = [
-  {
-    provide: CONFIG,
-    useValue: config,
-  },
+  ConfigService,
   {
     provide: Logger,
-    useFactory: () => new ConsoleLogger('products'),
+    useFactory: () => new ConsoleLogger('___PRODUCTS___'),
   },
 ];
 @Module({
