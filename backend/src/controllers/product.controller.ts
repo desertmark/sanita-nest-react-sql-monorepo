@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IListDto } from 'src/models/dtos/list.dto';
+import { IListDto } from '../models/dtos/list.dto';
 import { ProductManager } from '../managers/product.manager';
 import { ProductEntity } from '../models/entities/product.entity';
 

@@ -1,7 +1,8 @@
+
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CONFIG, IConfig } from './config/config';
+import { ConfigService } from './config/config.service';
 
 const BANNER = `
 ███████╗ █████╗ ███╗   ██╗██╗████████╗ █████╗ 
@@ -14,7 +15,7 @@ const BANNER = `
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  const { server } = await app.resolve<IConfig>(CONFIG);
+  const { server } = (await app.resolve<ConfigService>(ConfigService)).config;
   const logger = await app.resolve(Logger);
   await app.listen(server.port, server.host, () => {
     logger.log(BANNER);

@@ -36,22 +36,14 @@ export class CommonUtils {
       'No description'
     );
   }
-
-  // static getChunks<T>(array: T[], size = 10): T[][] {
-  //   const chunks = [];
-  //   for (let i = 0; i < array.length; i = i + size) {
-  //     const temp = [];
-  //     for (let j = i; j < i + size && j < array.length; j++) {
-  //       temp.push(array[j]);
-  //     }
-  //     chunks.push(temp);
-  //   }
-  //   return chunks;
-  // }
 }
 
 export class ChunkUtil<T> {
-  constructor(private items: T[], private size: number = 1) {}
+  constructor(
+    private items: T[],
+    private size: number = 1,
+    private delayBetweenChunksMs = 0,
+  ) {}
   public page = 0;
 
   next(): T[] {
@@ -64,8 +56,15 @@ export class ChunkUtil<T> {
     let chunk = this.next();
     while (chunk?.length) {
       await cb(chunk, this.page);
+      await this.sleep(this.delayBetweenChunksMs);
       chunk = this.next();
     }
     return;
+  }
+
+  async sleep(time: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, time);
+    });
   }
 }

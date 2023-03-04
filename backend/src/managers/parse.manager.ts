@@ -1,10 +1,9 @@
 import { writeFileSync, readFileSync, unlinkSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { execSync } from 'child_process';
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { CONFIG, IConfig } from '../config/config';
-import axios, { AxiosError } from 'axios';
-import * as FormData from 'form-data';
+import { Injectable, Logger } from '@nestjs/common';
+import { read, utils } from 'xlsx';
+import { omit } from 'lodash';
 export interface ParseServiceResponseBody<T = any> {
   data: T;
   type: string;
@@ -12,7 +11,7 @@ export interface ParseServiceResponseBody<T = any> {
 @Injectable()
 export class ParseManager {
   constructor(
-    @Inject(CONFIG) private config: IConfig,
+    // @Inject(CONFIG) private config: IConfig,
     private logger: Logger,
   ) {}
 
@@ -43,7 +42,7 @@ export class ParseManager {
     } catch (error) {
       this.logger.error('Failed to parse mdb to json', {
         error,
-        file,
+        file: omit(file, 'buffer'),
         tableName,
       });
       throw error;
@@ -59,26 +58,37 @@ export class ParseManager {
     headerIndex: number,
   ): Promise<T> {
     try {
-      const form = new FormData();
-      form.append('file', file.buffer, file.originalname);
-      form.append('headerIndex', headerIndex);
-
-      const res = await axios.post<ParseServiceResponseBody<T>>(
-        this.config.parseServiceUrl,
-        form,
-        {
-          headers: {
-            ...form.getHeaders(),
-          },
-        },
-      );
-      return res.data.data;
-    } catch (error) {
-      this.logger.error('Failed to parse xls to json', error, {
-        parseServiceUrl: this.config.parseServiceUrl,
-        error: error?.response?.data || error?.message || error,
-        headerIndex,
+      // Código | Descripción | Precio | Bonif1 |	Bonif2 | Neto Final con IVA | Precio Cliente con Margen | Estado
+      const json = [];
+      // Read file and get cell matrix
+      const rows = this.readFirstSheetRows(file.buffer);
+      // Get Header Row
+      const headerKeys = rows[headerIndex];
+      // Get Data Rows
+      const dataRows = rows
+        .splice(headerIndex + 1)
+        .map((dr) => Object.values(dr));
+      // For each data row use header to build item
+      dataRows.forEach((dr) => {
+        const item = {};
+        headerKeys.forEach((key, index) => {
+          item[key] = dr[index];
+        });
+        json.push(item);
       });
+      return json as T;
+    } catch (error) {
+      this.logger.error('Failed to parse xls to json', error);
+      throw error;
     }
+  }
+
+  private readFirstSheetRows(fileBuffer: Buffer): string[][] {
+    const wb = read(fileBuffer, { type: 'buffer' });
+    const firstSheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = utils
+      .sheet_to_json<string>(firstSheet, { header: 'A' })
+      ?.map((dr) => Object.values(dr));
+    return rows;
   }
 }

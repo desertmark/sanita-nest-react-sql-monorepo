@@ -1,6 +1,7 @@
 import { join } from 'path';
+import { ConfigService } from '../config/config.service';
 import { DataSource } from 'typeorm';
-import { config } from '../config/config';
+const config = new ConfigService().config;
 
 console.log('__MIGRATIONS__', config);
 

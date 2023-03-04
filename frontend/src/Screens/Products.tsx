@@ -131,12 +131,12 @@ export const Products: FC = () => {
               ref={mdbRef}
             />
             <Button
-              disabled={!xlsSelected}
+              disabled={!mdbSelected}
               variant="outlined"
               onClick={async () => {
-                await postMdb!(xlsSelected!);
+                await postMdb!(mdbSelected!);
                 setMdb(undefined);
-                xlsRef?.current?.reset();
+                mdbRef?.current?.reset();
               }}
             >
               Actualizar base
@@ -151,15 +151,15 @@ export const Products: FC = () => {
               onChange={(files) => {
                 setXls(files);
               }}
-              ref={mdbRef}
+              ref={xlsRef}
             />
             <Button
-              disabled={!mdbSelected}
+              disabled={!xlsSelected}
               variant="outlined"
               onClick={async () => {
-                await postXls!(mdbSelected!);
+                await postXls!(xlsSelected!);
                 setXls(undefined);
-                mdbRef?.current?.reset();
+                xlsRef?.current?.reset();
               }}
             >
               Actualizar base

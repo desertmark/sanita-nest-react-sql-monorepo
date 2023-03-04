@@ -1,20 +1,22 @@
+process.env.REPOSITORY = 'cosmos';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
-import { EntityManager, Repository } from 'typeorm';
 import { ProductCalculator } from '../src/utils/product.mapper';
-import { ProductEntity } from '../src/models/entities/product.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CategoryEntity } from '../src/models/entities/category.entity';
-import { MdbProduct } from '../src/models/entities/mdb-product.entity';
 import { v4 as uuidv4 } from 'uuid';
-
+import {
+  CosmosContainers,
+  CosmosService,
+} from '../src/database/cosmos.service';
+import { merge } from 'lodash';
+import { ConfigService } from '../src/config/config.service';
 export function productFactory(codeString = '00.00.00.01', overrides = {}) {
   const code = parseInt(codeString.replace(/\./g, ''));
   return {
+    id: codeString,
     code,
     codeString,
     description: `Test-description-${uuidv4()}`,
@@ -33,73 +35,80 @@ export function productFactory(codeString = '00.00.00.01', overrides = {}) {
     bonus2: 0.1,
     cashDiscount: 0.1,
     cashDiscount2: 0.1,
+    pk: CosmosContainers.Products,
     ...overrides,
   };
 }
-
-describe('ProductController (e2e)', () => {
+jest.setTimeout(30000);
+describe('ProductController (e2e) (cosmos)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
+    process.env.REPOSITORY = 'cosmos';
+    const config = new ConfigService().config;
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider<any>(ConfigService)
+      .useValue({
+        config: merge(config, {
+          cosmos: {
+            database: 'sanita-test',
+          },
+        } as any),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
   afterEach(async () => {
-    return await app.get(EntityManager).query(
-      `
-        DELETE FROM Products;
-        DELETE FROM Categories;
-        DELETE FROM MdbProducts;
-        DELETE FROM XlsProducts;
-        `,
-    );
+    await app.get<CosmosService>(CosmosService).products.container.delete();
   });
 
-  it("Should insert all file's products into the DB", (done) => {
+  it("Should insert all file's products into the DB", async () => {
     // Arrange
     const expectedResult = [
       {
         description: 'Producto 1',
-        code: '99999901',
+        code: 99999901,
         codeString: '99.99.99.01',
       },
       {
         description: 'Producto 2',
-        code: '99999902',
+        code: 99999902,
         codeString: '99.99.99.02',
       },
       {
         description: 'Producto 3',
-        code: '99999903',
+        code: 99999903,
         codeString: '99.99.99.03',
       },
     ];
     const path = resolve('test', 'data', 'insert.mdb');
     const file = readFileSync(path);
-    // const form = new FormData();
-    // form.append('file', file);
     // Act
-    request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/products/mdb')
       .attach('file', file, 'insert.mdb')
-      .expect(201)
-      .end(async () => {
-        // Assert
-        const dbRes = await app
-          .get(EntityManager)
-          .query(
-            'SELECT * FROM PRODUCTS WHERE Code in (99999901, 99999902, 99999903)',
-          );
-        expect(dbRes[0]).toEqual(expect.objectContaining(expectedResult[0]));
-        expect(dbRes[1]).toEqual(expect.objectContaining(expectedResult[1]));
-        expect(dbRes[2]).toEqual(expect.objectContaining(expectedResult[2]));
-        done();
-      });
+      .expect(201);
+    // Assert
+    const res = await app
+      .get(CosmosService)
+      .products.query({
+        query: `
+          SELECT c.code, c.codeString, c.description
+          FROM c
+          WHERE c.code in (99999901, 99999902, 99999903)
+          ORDER BY c.code ASC
+        `,
+      })
+      .fetchAll();
+    const dbRes = res.resources;
+    expect(dbRes[0]).toEqual(expect.objectContaining(expectedResult[0]));
+    expect(dbRes[1]).toEqual(expect.objectContaining(expectedResult[1]));
+    expect(dbRes[2]).toEqual(expect.objectContaining(expectedResult[2]));
   });
 
   it.each([
@@ -108,7 +117,7 @@ describe('ProductController (e2e)', () => {
       [
         {
           description: 'Producto Updated 1',
-          code: '99999901',
+          code: 99999901,
           codeString: '99.99.99.01',
           utility: 0.3,
           listPrice: 56.19,
@@ -122,7 +131,7 @@ describe('ProductController (e2e)', () => {
         },
         {
           description: 'Producto Updated 2',
-          code: '99999902',
+          code: 99999902,
           codeString: '99.99.99.02',
           utility: 0.3,
           listPrice: 56.19,
@@ -136,7 +145,7 @@ describe('ProductController (e2e)', () => {
         },
         {
           description: 'Producto Updated 3',
-          code: '99999903',
+          code: 99999903,
           codeString: '99.99.99.03',
           utility: 0.3,
           listPrice: 56.19,
@@ -150,7 +159,7 @@ describe('ProductController (e2e)', () => {
         },
         {
           description: 'Producto 4',
-          code: '99999904',
+          code: 99999904,
           codeString: '99.99.99.04',
           utility: 0.3,
           listPrice: 56.19,
@@ -169,12 +178,13 @@ describe('ProductController (e2e)', () => {
     "Should %p all file's products into the DB",
     async (_msg, expectedResult, fileName) => {
       // Arrange
-      const manager = app.get(EntityManager);
-      const productRepository = manager.getRepository(ProductEntity);
-      await productRepository.insert({
+      const productsRepository = app.get(CosmosService).products;
+      await productsRepository.upsert({
+        id: expectedResult[0].codeString,
         code: +expectedResult[0].code,
         codeString: expectedResult[0].codeString,
-        description: 'Exitent Product',
+        description: 'Existent Product',
+        pk: CosmosContainers.Products,
       });
 
       // Act
@@ -182,9 +192,7 @@ describe('ProductController (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/products/mdb')
         .attach('file', file, fileName);
-      const dbRes = await productRepository.find({
-        order: { code: 'ASC' },
-      });
+      const dbRes = (await productsRepository.readAll().fetchAll()).resources;
       // Assert
       expect(res.statusCode).toBe(201);
       expect(dbRes.length).toEqual(expectedResult.length);
@@ -203,17 +211,15 @@ describe('ProductController (e2e)', () => {
     };
 
     // Arrange
-    const productsRepository = app
-      .get(EntityManager)
-      .getRepository(ProductEntity);
+    const productsRepository = app.get(CosmosService).products;
 
     const products = [
       productFactory('00.00.00.01'),
       productFactory('00.00.00.02'),
     ];
 
-    await productsRepository.insert(products[0]);
-    await productsRepository.insert(products[1]);
+    await productsRepository.upsert(products[0]);
+    await productsRepository.upsert(products[1]);
 
     const keysToAssert = ['bonus', 'bonus2', 'listPrice'];
     const file = readFileSync(resolve('test', 'data', 'bulk-update.xls'));
@@ -224,7 +230,7 @@ describe('ProductController (e2e)', () => {
 
     // Assert
     expect(response.status).toBe(201);
-    const res = await productsRepository.find();
+    const res = (await productsRepository.readAll().fetchAll()).resources;
     products.forEach((product, i) => {
       keysToAssert.forEach((k) => {
         const dbProduct = res[i];
