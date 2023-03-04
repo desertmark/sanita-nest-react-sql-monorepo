@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { execSync } from 'child_process';
 import { Injectable, Logger } from '@nestjs/common';
 import { read, utils } from 'xlsx';
-
+import { omit } from 'lodash';
 export interface ParseServiceResponseBody<T = any> {
   data: T;
   type: string;
@@ -42,7 +42,7 @@ export class ParseManager {
     } catch (error) {
       this.logger.error('Failed to parse mdb to json', {
         error,
-        file,
+        file: omit(file, 'buffer'),
         tableName,
       });
       throw error;

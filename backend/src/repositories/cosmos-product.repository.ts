@@ -8,7 +8,6 @@ import { CosmosContainers, CosmosService } from '../database/cosmos.service';
 import { UpsertOperationInput } from '@azure/cosmos';
 import { ProductMapper } from '../utils/product.mapper';
 import { ProductRepository } from './product.repository';
-import { productFactory } from 'test/cosmos-products.e2e-spec';
 
 const QUERIES = {
   SELECT_PRODUCTS_PAGINATED: `
@@ -82,7 +81,7 @@ export class CosmosProductRepository extends ProductRepository {
 
   async upsertMany(entitiesJson: IMdbProduct[]) {
     this.logger.log('Upsert Mdb Products in chunks');
-    await new ChunkUtil<IMdbProduct>(entitiesJson, 100).doInChunks(
+    await new ChunkUtil<IMdbProduct>(entitiesJson, 100, 100).doInChunks(
       async (chunk, page) => {
         this.logger.debug(`Upsert Mdb Product in chunk: ${page}`);
         const operations: UpsertOperationInput[] = chunk.map((item) => {
@@ -94,6 +93,19 @@ export class CosmosProductRepository extends ProductRepository {
           };
         });
         const results = await this.cosmosService.products.bulk(operations);
+        if (results.some((r) => r.statusCode > 399)) {
+          this.logger.error('Failed to process chunk');
+          this.logger.error({
+            success: results.filter((r) => r.statusCode < 400)?.length,
+            failed: results.filter((r) => r.statusCode > 399)?.length,
+            results,
+          });
+          throw new Error(
+            `Failed to process page ${page}, chunk ${chunk[0].codigo} - ${
+              chunk[chunk.length - 1].codigo
+            }`,
+          );
+        }
         this.logger.debug('Finished');
       },
     );
@@ -112,34 +124,13 @@ export class CosmosProductRepository extends ProductRepository {
     };
   }
 
-  // async upsertMany(entitiesJson: IMdbProduct[]) {
-  //   this.logger.log('Insert Mdb Products in chunks');
-  //   const entities = entitiesJson.map((p) =>
-  //     ProductMapper.mdbProductToProductEntity(p, []),
-  //   );
-  //   await new ChunkUtil<ProductEntity>(entities, 100).doInChunks(
-  //     async (chunk, page) => {
-  //       this.logger.debug(`Upsert Mdb Product in chunk: ${page}`);
-  //       const chunkUpserts = chunk.map((product) =>
-  //         this.cosmosService.products.upsert({
-  //           ...product,
-  //           id: product.codeString,
-  //           pk: CosmosContainers.Products,
-  //         }),
-  //       );
-  //       await Promise.all(chunkUpserts);
-  //     },
-  //   );
-  //   this.logger.debug(`Upsert Mdb Product done.`);
-  // }
-
   /**
    * Takes xlsProduct model and performs bulk update
    * @param xlsProducts
    */
   public async updateFromXlsProducts(xlsProducts: IXlsUpdateProduct[]) {
     this.logger.debug('Update many xls products in chunks....');
-    await new ChunkUtil<IXlsUpdateProduct>(xlsProducts, 30).doInChunks(
+    await new ChunkUtil<IXlsUpdateProduct>(xlsProducts, 100, 100).doInChunks(
       async (chunk, page) => {
         this.logger.debug(`Update Xls Product in chunk: ${page}`);
         const updates = chunk.map(async (xlsProduct) => {
@@ -169,33 +160,30 @@ export class CosmosProductRepository extends ProductRepository {
   }
 
   /**
-   * Finds the product id by the products code.
-   */
-  private async findProductIdByCode(code: number): Promise<string> {
-    const { resources } = await this.cosmosService.products
-      .query<{ id: string }>({
-        query: QUERIES.SELEC_ELEMENT_ID_BY_CODE,
-        parameters: [{ name: 'code', value: code }],
-      })
-      .fetchAll();
-    return resources?.[0].id;
-  }
-
-  /**
    * Patches price bonus and bonus2 fields of a product document.
    */
   private async updateFromXlsProductById(
     id: string,
     xlsProduct: IXlsUpdateProduct,
   ) {
-    return await this.cosmosService.products.container
-      .item(id, CosmosContainers.Products)
-      .patch({
-        operations: [
-          { op: 'set', path: '/listPrice', value: xlsProduct.precio },
-          { op: 'set', path: '/bonus', value: xlsProduct.bonificacion },
-          { op: 'set', path: '/bonus2', value: xlsProduct.bonificacion2 },
-        ],
-      });
+    try {
+      await this.cosmosService.products.container
+        .item(id, CosmosContainers.Products)
+        .patch({
+          operations: [
+            { op: 'set', path: '/listPrice', value: xlsProduct.precio },
+            { op: 'set', path: '/bonus', value: xlsProduct.bonificacion },
+            { op: 'set', path: '/bonus2', value: xlsProduct.bonificacion2 },
+          ],
+        });
+    } catch (error) {
+      if (error?.code === 404) {
+        this.logger.warn(
+          `Product ${xlsProduct.codigoString} not found, ignoring update`,
+        );
+      } else {
+        throw error;
+      }
+    }
   }
 }
